@@ -1326,6 +1326,17 @@ lshpack_dec_dec_int (const unsigned char **src_p, const unsigned char *src_end,
     {
         if (src < src_end)
         {
+            /* A uint32_t integer is at most LSHPACK_UINT32_ENC_SZ octets
+             * (RFC 7541 5.1): the prefix and five continuations, the last
+             * of which is shifted by 28.  Without this bound the loop
+             * keeps reading while the high bit is set, and the sixth
+             * continuation shifts by 35 - undefined for a 32-bit type.
+             * The check below rejects such an encoding anyway (M would be
+             * 42, which neither of its arms accepts), so this returns the
+             * same -2 it always did, before the shift instead of after.
+             */
+            if (src - orig_src >= LSHPACK_UINT32_ENC_SZ)
+                return -2;
             B = *src++;
             val = val + ((B & 0x7f) << M);
             M += 7;
