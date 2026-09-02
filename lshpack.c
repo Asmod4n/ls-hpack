@@ -1348,7 +1348,15 @@ lshpack_dec_dec_int (const unsigned char **src_p, const unsigned char *src_end,
     }
     while (B & 0x80);
 
-    if (M <= 28 || (M == 35 && src[-1] <= 0xF && val - (src[-1] << 28) < val))
+    /* src[-1] is an unsigned char and promotes to int, so src[-1] << 28
+     * is a signed shift that overflows for any value above 7 - and this
+     * arm is reached only when src[-1] is at most 0xF, so 8 through 0xF
+     * are exactly the values it sees.  The subtraction wants that
+     * octet's contribution at bit 28 as an unsigned quantity.
+     */
+    if (M <= 28
+            || (M == 35 && src[-1] <= 0xF
+                        && val - ((uint32_t) src[-1] << 28) < val))
     {
         *src_p = src;
         *value_p = val;
