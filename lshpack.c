@@ -233,7 +233,8 @@ lshpack_arr_push (struct lshpack_arr *arr, uintptr_t val)
     new_els = malloc(n * sizeof(arr->els[0]));
     if (!new_els)
         return -1;
-    memcpy(new_els, arr->els + arr->off, sizeof(arr->els[0]) * arr->nelem);
+    if (arr->nelem)
+        memcpy(new_els, arr->els + arr->off, sizeof(arr->els[0]) * arr->nelem);
     free(arr->els);
     arr->off = 0;
     arr->els = new_els;
