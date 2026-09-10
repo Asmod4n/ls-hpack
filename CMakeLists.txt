@@ -58,6 +58,17 @@ IF (CMAKE_C_COMPILER_ID STREQUAL GNU
             SET(MY_CMAKE_FLAGS "${MY_CMAKE_FLAGS} -g0 -O3")
         ELSE()
             SET(MY_CMAKE_FLAGS "${MY_CMAKE_FLAGS} -g3 -O0 -fsanitize=address")
+            # UndefinedBehaviorSanitizer beside the address one, and set to
+            # END the run rather than log and walk past: undefined behaviour
+            # that is printed and continued is a suite that passes while it
+            # is broken.
+            #
+            # -fno-sanitize=alignment: deps/xxhash reads unaligned on
+            # purpose and is compiled into every test and tool here, so the
+            # alignment check reports on it and on nothing of ours.
+            SET(MY_CMAKE_FLAGS "${MY_CMAKE_FLAGS} -fsanitize=undefined")
+            SET(MY_CMAKE_FLAGS "${MY_CMAKE_FLAGS} -fno-sanitize-recover=undefined")
+            SET(MY_CMAKE_FLAGS "${MY_CMAKE_FLAGS} -fno-sanitize=alignment")
         ENDIF()
 ENDIF()
 
